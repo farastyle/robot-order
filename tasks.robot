@@ -15,6 +15,7 @@ Library           RPA.Robocorp.WorkItems
 Library           RPA.JSON
 Library           RPA.Tables
 Library           html_tables.py
+Library           RPA.FileSystem
 
 *** Variables ***
 ${username}=      gilberto5@gilberto.com
@@ -22,15 +23,29 @@ ${password}=      donpedro
 ${link}=          https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0ea65689-6a27-40ca-8799-f2811205c42c/Tabela_de_Produtos.xlsx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220426%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220426T103045Z&X-Amz-Expires=86400&X-Amz-Signature=0e6dc82c0c7e32b26c2289aee830b74d73a518edff2f8a0d098215c0b38fe468&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Tabela%2520de%2520Produtos.xlsx%22&x-id=GetObject
 ${names}
 ${breeds}
+${html_table}
 
 *** Tasks ***
-Registra produtos
+Loga no site
     Abre site
     loga server
+
+Registra produtos
     Open Excel
 
 Cria lista de produtos
     Vai para Lista de produtos
+
+Cria tabela
+    Novo metodo
+    #${table}=    Read Table From Html    ${html_table}
+    #${dimensions}=    Get Table Dimensions    ${table}
+    #${first_row}=    Get Table Row    ${table}    ${0}
+    #${first_cell}=    RPA.Tables.Get Table Cell    ${table}    ${0}    ${0}
+    #FOR    ${row}    IN    @{table}
+    #    Log To Console    ${row}
+    #END
+    #Write table to CSV    ${table}    output.csv
 
 *** Keywords ***
 Abre site
@@ -43,7 +58,7 @@ Loga Server
     Input Password    password    ${password}
     Select Checkbox    administrador
     Click Button    xpath: //*[contains(text(), "Cadastrar")]
-    #Check for error
+    #Check for error if admin is already in
     Set Selenium Implicit Wait    3
     ${onemore}    Is Element Visible    xpath=//*[@id="root"]/div/div/form/div[1]/button/span
     IF    ${onemore}
@@ -53,7 +68,7 @@ Loga Server
         Click Element    //*[@id="root"]/div/div/form/button
         Exit For Loop If    ${onemore} == False
     END
-    Set Selenium Implicit Wait    20
+    Set Selenium Implicit Wait    10
     Click Element    xpath://*[@id="navbarTogglerDemo01"]/ul/li[4]/a
     Wait Until Page Contains Element    imagem
 
@@ -84,19 +99,8 @@ Open Excel
 
 Vai para Lista de produtos
     Click Element When Visible    xpath://*[@id="navbarTogglerDemo01"]/ul/li[5]/a
-    Read HTML table as Table
+    Set Selenium Implicit Wait    7
 
-Read HTML table as Table
-    ${html_table}=    Get HTML table
-    ${table}=    Read Table From Html    ${html_table}
-    ${dimensions}=    Get Table Dimensions    ${table}
-    ${first_row}=    Get Table Row    ${table}    ${0}
-    ${first_cell}=    RPA.Tables.Get Table Cell    ${table}    ${0}    ${0}
-    FOR    ${row}    IN    @{table}
-        Log To Console    ${row}
-    END
-    Write table to CSV    ${html_table}    output.csv
-
-Get HTML table
-    ${html_table}=    Get Element Attribute    //*[@id="root"]/div/div/p/table    outerHTML
-    [Return]    ${html_table}
+Novo metodo
+    ${html_table}=    Get Element Attribute    xpath://*[@id="root"]/div/div/p/table    outerHTML
+    Create File    ${CURDIR}/tabelaatualizada.csv    ${html_table}    encoding=utf-8    overwrite=True
