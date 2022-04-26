@@ -4,85 +4,73 @@ Library           Collections
 Library           MyLibrary
 Resource          keywords.robot
 Variables         MyVariables.py
-Library           RPA.Browser.Selenium
+Library           RPA.Browser.Selenium    auto_close=${FALSE}
 Library           RPA.Tables
 Library           RPA.HTTP
 Library           RPA.PDF
-Library           RPA.Robocorp.WorkItems
-Library           RPA.PDF
 Library           RPA.Archive
 Library           RPA.Robocorp.Vault
-Library           RPA.Dialogs
-
-*** Tasks ***
-Request question
-    Open questionary
-
-Order Robot from robotsparebin industries inc
-    Download the CSV file
-    Open website
-    Fill the form using the data from CSV file
-
-Archive all pdf
-    Add all pdf to Archive
+Library           RPA.Excel.Files
+Library           RPA.Robocorp.WorkItems
+Library           RPA.JSON
+Library           RPA.Tables
+Library           RPA.Excel.Application
 
 *** Variables ***
-${results}=       robottasks
+${username}=      gilberto5@gilberto.com
+${password}=      donpedro
+${link}=          https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0ea65689-6a27-40ca-8799-f2811205c42c/Tabela_de_Produtos.xlsx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220425%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220425T164047Z&X-Amz-Expires=86400&X-Amz-Signature=abf2bb2416e6b1be695dcc63451dabd7f8a419e252bf57bbad19864b97296825&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Tabela%2520de%2520Produtos.xlsx%22&x-id=GetObject
+${names}
+${breeds}
+
+*** Tasks ***
+Registra produtos
+    Abre site
+    loga server
+    Open Excel
+
+Cria lista de produtos
+
 
 *** Keywords ***
-Open questionary
-    Add heading    Do you want zipfile on your name?    size=Large
-    Add heading    Please enter your Name
-    Add text input    message
-    #Insert user information    ${result.Name}
-    Add submit buttons    buttons=No,Yes    default=Yes
-    ${result}=    Run dialog    timeout=60
-    IF    $result.submit == "Yes"
-        ${results}=    ${result.message}
+Abre site
+    Open Available Browser    https://front.serverest.dev/login
+
+Loga Server
+    Click Element    xpath: //*[contains(text(), "Cadastre-se")]
+    Input Text    nome    ${username}
+    Input Text    email    ${username}
+    Input Password    password    ${password}
+    Select Checkbox    administrador
+    Click Button    xpath: //*[contains(text(), "Cadastrar")]
+    Set Selenium Implicit Wait    20
+    Click Element    xpath://*[@id="navbarTogglerDemo01"]/ul/li[4]/a
+    Wait Until Page Contains Element    imagem
+
+Cadastra produto
+    [Arguments]    ${orderNumber}
+    Wait Until Page Contains Element    xpath://*[@id="root"]/div/div/div/form/h1
+    Input Text When Element Is Visible    id:nome    ${orderNumber}[Nome]
+    Input Text When Element Is Visible    id:price    ${orderNumber}[Preço]
+    Input Text When Element Is Visible    id:description    ${orderNumber}[Descrição]
+    Input Text When Element Is Visible    id:quantity    ${orderNumber}[Quantidade]
+    #${before}=    Http Get    https://api.thecatapi.com/v1/images/search    ###infomation saved for later
+    #${json}=    Convert string to JSON    ${before}
+    #@{link}=    Get values from JSON    ${names}    ${breeds}[*].url
+    Choose File    id:imagem    ${CURDIR}/nMBCPd7pu.jpg
+    Click Button    xpath: //*[contains(text(), "Cadastrar")]
+    Wait Until Page Contains Element    xpath://*[@id="root"]/div/div/h1
+    Click Element When Visible    xpath://*[@id="navbarTogglerDemo01"]/ul/li[4]/a
+
+Open Excel
+    Download    ${link}    overwrite=True
+    Open Workbook    Tabela_de_Produtos.xlsx
+    ${orderNumbers}=    Read Worksheet As Table    header=True
+    Close Workbook
+    FOR    ${orderNumber}    IN    @{orderNumbers}
+        Cadastra produto    ${orderNumber}
     END
 
-Download the CSV file
-    Download    https://robotsparebinindustries.com/orders.csv    overwrite=True
-
-Open website
-    ${page}=    Get Secret    robotorder
-    Open Available Browser    ${page}[Link]
-    Wait Until Page Contains Element    class:alert-buttons
-    Click Button    xpath: //*[contains(text(), "OK")]
-
-Fill and submit the form for one person
-    [Arguments]    ${OrderNumber}
-    Select From List By Index    id:head    ${OrderNumber}[Head]
-    Select Radio Button    body    ${OrderNumber}[Body]
-    Input Text    class:form-control    ${OrderNumber}[Head]
-    Input Text    address    ${OrderNumber}[Address]
-    Click Button    preview
-    Wait Until Page Contains Element    robot-preview-image
-    Click Button    order
-    Check for error
-    Screenshot    id:receipt    filename=${CURDIR}/output/print${OrderNumber}[Order number].png
-    Screenshot    id:robot-preview-image    filename=${CURDIR}/output/robot${OrderNumber}[Order number].png
-    ${receipt_html}=    Get Element Attribute    id:receipt    outerHTML
-    Html To Pdf    ${receipt_html}    ${CURDIR}/output/receipts${OrderNumber}[Order number].pdf
-    Open PDF    ${CURDIR}/output/receipts${OrderNumber}[Order number].pdf
-    Add Watermark Image To PDF    image_path=${CURDIR}/output/robot${OrderNumber}[Order number].png    source_path=${CURDIR}/output/receipts${OrderNumber}[Order number].pdf    output_path=${CURDIR}/output/receipts${OrderNumber}[Order number].pdf
-    Close Pdf
-    Wait Until Element Is Visible    id:order-another
-    Click Button    order-another
-    Click Button    xpath: //*[contains(text(), "OK")]
-
-Fill the form using the data from CSV file
-    ${table}=    Read table from CSV    orders.csv    header=True
-    FOR    ${OrderNumber}    IN    @{table}
-        Fill and submit the form for one person    ${OrderNumber}
-    END
-
-Check for error
-    FOR    ${onemore}    IN RANGE    10
-        ${onemore}    Is Element Visible    xpath=//*[@id="order-another"]
-        Exit For Loop If    ${onemore} == True
-        Wait And Click Button    xpath=//*[@id="order"]
-    END
-
-Add all pdf to Archive
-    Archive Folder With Zip    ${CURDIR}/output    ${CURDIR}/output/${results}.zip    include=*.pdf
+Cria Lista produtos
+    Click Element When Visible    xpath://*[@id="navbarTogglerDemo01"]/ul/li[5]/a
+    #Get table cell    xpath://*[@id="root"]/div/div/p/table
