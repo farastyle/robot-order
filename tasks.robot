@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Template robot main suite, robot for order robot at robotsparebin
+Documentation     Este robo vai logar no .serverest.dev criar uma conta como admin, caso nao der certo vai tentar logar como usuario. depois inicia uma leitura no aquivo excel coloca as infomacoes no formulario, envia ( estas infomacoe por enquanto tem quer ser unicas, podemos tratar o erro para continuar se itens ja existirem) apos cadastrar itens volta para pagina de lista de itens e cria um aquivo com a tabela de itens - a recomendacao seria colocar os usuarios em arquivo vault tratar erros quando itens ja estao cadastrados, preciso de maior conhecimento em como pegar essa tabela de forma correta!
 Library           Collections
 Library           MyLibrary
 Resource          keywords.robot
@@ -27,7 +27,7 @@ ${html_table}
 
 *** Tasks ***
 Loga no site
-    Abre site
+    Abre pagina
     loga server
 
 Registra produtos
@@ -38,8 +38,8 @@ Cria lista de produtos
 
 Cria tabela
     Novo metodo
-    #${table}=    Read Table From Html    ${html_table}
-    #${dimensions}=    Get Table Dimensions    ${table}
+    #${table}=    Read Table From Html    ${html_table}    #estes codigos foram deixados para traz para depois aperfeicoar o sistema.
+    #${dimensions}=    Get Table Dimensions    ${table}    #nao foi possivel reconhecer a tabela da lista e por iss nao foi possivel criar um arquivo desejado apenas para cumprir os requisitos continuei de outra forma
     #${first_row}=    Get Table Row    ${table}    ${0}
     #${first_cell}=    RPA.Tables.Get Table Cell    ${table}    ${0}    ${0}
     #FOR    ${row}    IN    @{table}
@@ -48,7 +48,7 @@ Cria tabela
     #Write table to CSV    ${table}    output.csv
 
 *** Keywords ***
-Abre site
+Abre pagina
     Open Available Browser    https://front.serverest.dev/login    maximized=true
 
 Loga Server
@@ -102,5 +102,5 @@ Vai para Lista de produtos
     Set Selenium Implicit Wait    7
 
 Novo metodo
-    ${html_table}=    Get Element Attribute    xpath://*[@id="root"]/div/div/p/table    outerHTML
+    ${html_table}=    Get Element Attribute    //*[@id="root"]/div/div/p/table    outerHTML
     Create File    ${CURDIR}/tabelaatualizada.csv    ${html_table}    encoding=utf-8    overwrite=True
