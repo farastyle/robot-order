@@ -11,4 +11,14 @@ Vamos para a tarefa Cria lista de tabela. Apos e todos os objetos cadastrados va
 
 antes de pensar em parar tentei jogar toda a pagina com a informacao num arquivo csv e ver se conseguia algun resultado, e nem assim foi possivel. resolvi que ja tinha 24horas que o Thiago tinha me passado o teste, seria melhor mandar assim do que nao mandar,
 
-Melhorias que eu posso acrescentar. 1- O login teria que ir para um arquvio vault.json ou ate mesmo usar o vault da robocorp, ate coloquei RPA.Robocorp.Vault mas pensei que ficaria mais facil explicar dessa forma. 2- ao Cadastrar produtos se o produto ja estiver cadastrado a pagina retorna ja cadastrado, seria recomendado fazer um if e verificar se objeto esta visivel caso nao, clicar na lista de arquivos e segui para o proximo iten 3- Arrumar essa parte de pegar a tabela, sei que estava proximo da solucao, mas apos exaustivos testes achei prudente finalizar o projeto.
+
+Atualizacoes feitas:
+login funcionando de forma segura
+verifica se o iten foi cadastrado mensagem apareceu, e continua operacao sem dar erro.
+fecha janelas no final!!
+
+A melhorar e acrescentar. 
+{html_table} continua pegando so a primeira linha por uma razao que eu desconheco.
+Arrumar essa parte de pegar a tabela,
+
+Sei que estava proximo da solucao, mas apos exaustivos testes achei prudente finalizar o projeto.
