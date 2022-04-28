@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Este robo vai logar no .serverest.dev criar uma conta como admin, caso nao der certo vai tentar logar como usuario. depois inicia uma leitura no aquivo excel coloca as infomacoes no formulario, envia ( estas infomacoe por enquanto tem quer ser unicas, podemos tratar o erro para continuar se itens ja existirem) apos cadastrar itens volta para pagina de lista de itens e cria um aquivo com a tabela de itens - a recomendacao seria colocar os usuarios em arquivo vault tratar erros quando itens ja estao cadastrados, preciso de maior conhecimento em como pegar essa tabela de forma correta!
+Documentation     v1.02 Este robo vai logar no .serverest.dev criar uma conta como admin, caso nao der certo vai tentar logar como usuario. depois inicia uma leitura no aquivo excel coloca as infomacoes no formulario, envia ( estas infomacoe por enquanto tem quer ser unicas, podemos tratar o erro para continuar se itens ja existirem) apos cadastrar itens volta para pagina de lista de itens e cria um aquivo com a tabela de itens - a recomendacao seria colocar os usuarios em arquivo vault tratar erros quando itens ja estao cadastrados, preciso de maior conhecimento em como pegar essa tabela de forma correta! e fecha tudo
 Library           Collections
 Library           MyLibrary
 Resource          keywords.robot
@@ -47,18 +47,22 @@ Cria tabela
     #END
     #Write table to CSV    ${table}    output.csv
 
+Finaliza
+    Fecha tudo
+
 *** Keywords ***
 Abre pagina
     Open Available Browser    https://front.serverest.dev/login    maximized=true
 
 Loga Server
     Click Element    xpath: //*[contains(text(), "Cadastre-se")]
-    Input Text    nome    ${username}
-    Input Text    email    ${username}
-    Input Password    password    ${password}
+    ${page}=    Get Secret    credentials
+    Input Text    nome    ${page}[username]
+    Input Text    email    ${page}[username]
+    Input Password    password    ${page}[password]
     Select Checkbox    administrador
     Click Button    xpath: //*[contains(text(), "Cadastrar")]
-    #Check for error if admin is already in
+    #Check for error if admin is already in    //*[@id="root"]/div/div/p/table
     Set Selenium Implicit Wait    3
     ${onemore}    Is Element Visible    xpath=//*[@id="root"]/div/div/form/div[1]/button/span
     IF    ${onemore}
@@ -85,7 +89,12 @@ Cadastra produto
     Download    ${url}    target_file=${orderNumber}[Nome].jpg    overwrite=True
     Choose File    id:imagem    ${CURDIR}/${orderNumber}[Nome].jpg
     Click Button    xpath: //*[contains(text(), "Cadastrar")]
-    Wait Until Page Contains Element    xpath://*[@id="root"]/div/div/h1
+    ${twomore}    Is Element Visible    xpath=//*[@id="root"]/div/div/p/table
+    IF    ${twomore}
+        Click Element When Visible    xpath://*[@id="navbarTogglerDemo01"]/ul/li[4]/a
+        Exit For Loop If    ${twomore} == False
+    END
+    #Wait Until Page Contains Element    xpath://*[@id="root"]/div/div/h1
     Click Element When Visible    xpath://*[@id="navbarTogglerDemo01"]/ul/li[4]/a
 
 Open Excel
@@ -104,3 +113,6 @@ Vai para Lista de produtos
 Novo metodo
     ${html_table}=    Get Element Attribute    //*[@id="root"]/div/div/p/table    outerHTML
     Create File    ${CURDIR}/tabelaatualizada.csv    ${html_table}    encoding=utf-8    overwrite=True
+
+Fecha tudo
+    Close Browser
