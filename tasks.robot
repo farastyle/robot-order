@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation     Template robot main suite, robot for order robot at robotsparebin
+Documentation     Este robo vai logar no .serverest.dev criar uma conta como admin, caso nao der certo vai tentar logar como usuario. depois inicia uma leitura no aquivo excel coloca as infomacoes no formulario, envia ( estas infomacoe por enquanto tem quer ser unicas, podemos tratar o erro para continuar se itens ja existirem) apos cadastrar itens volta para pagina de lista de itens e cria um aquivo com a tabela de itens - a recomendacao seria colocar os usuarios em arquivo vault tratar erros quando itens ja estao cadastrados, preciso de maior conhecimento em como pegar essa tabela de forma correta!
 Library           Collections
 Library           MyLibrary
 Resource          keywords.robot
@@ -20,14 +20,14 @@ Library           RPA.FileSystem
 *** Variables ***
 ${username}=      gilberto5@gilberto.com
 ${password}=      donpedro
-${link}=          https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0ea65689-6a27-40ca-8799-f2811205c42c/Tabela_de_Produtos.xlsx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220426%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220426T103045Z&X-Amz-Expires=86400&X-Amz-Signature=0e6dc82c0c7e32b26c2289aee830b74d73a518edff2f8a0d098215c0b38fe468&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Tabela%2520de%2520Produtos.xlsx%22&x-id=GetObject
+${link}=          https://doc-0s-3o-docs.googleusercontent.com/docs/securesc/kiaj3932uatpq3enb5ml3jjc88kg64vn/pre6ld1khss1rl8fm70thuk9haf84ddc/1651165725000/05215736671936011431/05215736671936011431/1YnuYJ01cPmEzB-NTmn6G_3NB7u1xThuP?e=download&ax=ACxEAsZdcqA9aZ-Ig1EUt1CRFtVWdj9gjEYhhumsutjRXohfmjpcJPwN_lyX_eDNDi6jmV3wO6dmQ0t96_c20pfq4Dk7jJqnc8wLY0DvYPF1MrXiRdBsW_dX2VX0hZa6Zx6Cb8rZeMugEMvD74slUaww42zhUR7ILFTJXChpNtgF1977YWegOr9_xwa3ZvxxrPMDHLjs6abiabRSf4QO_ohfS4SsxWYuco5RRV2yDNR2RkfWgZivjTW3pYivbTF162A_D-uY77vloBK7PrDYLwmabhSnBSGlCNOt-3jEDeOp2ZjuDKcPHUj6Z3P2B4PiGYcUMoBBUa4qsEzbb3wVr8qy0PV5oolAWbg5Uz2-T412DAc687ntRFIxppf1gSFQjDfc0rZDf-gWo4Jvhlgj1I1mxrKpkbwCpi5z_5xEv1dqbz6gtpkHDIs71Tl1oY9RgXjkqy49aS0ZD-_WxPyjlchC0e58zQFLK5zH0r1G-LwYxJZG7BJhJP0SXUvWGgAH97vnbcogn3RkoX20Gx9Qzsdzlmz6KZh4ZHUMtjctie1WUygMhxCb8723izJGB5Hy2MwTIS1DBvSItS33XeHKuMsBGu77SqfZcxQhf_09GD8ANpKtwn4XuMykZ0VaQcCRDIyrdYkMM7P0i-8HYcNjbsNFM_Vyc_a1-AvCI1lsRQkz6gJyj5NTeAD3fSPuQUUoOQD753fbhQyOf1RZL9utCKcvqVd621zEiE73uI9-SeMXunrmEJO-wgup&authuser=1&nonce=kgft3jp9rtoha&user=05215736671936011431&hash=6hqr33st77461slkubal4fp4f28lbo0u
 ${names}
 ${breeds}
 ${html_table}
 
 *** Tasks ***
 Loga no site
-    Abre site
+    Abre pagina
     loga server
 
 Registra produtos
@@ -38,8 +38,8 @@ Cria lista de produtos
 
 Cria tabela
     Novo metodo
-    #${table}=    Read Table From Html    ${html_table}
-    #${dimensions}=    Get Table Dimensions    ${table}
+    #${table}=    Read Table From Html    ${html_table}    #estes codigos foram deixados para traz para depois aperfeicoar o sistema.
+    #${dimensions}=    Get Table Dimensions    ${table}    #nao foi possivel reconhecer a tabela da lista e por iss nao foi possivel criar um arquivo desejado apenas para cumprir os requisitos continuei de outra forma
     #${first_row}=    Get Table Row    ${table}    ${0}
     #${first_cell}=    RPA.Tables.Get Table Cell    ${table}    ${0}    ${0}
     #FOR    ${row}    IN    @{table}
@@ -48,7 +48,7 @@ Cria tabela
     #Write table to CSV    ${table}    output.csv
 
 *** Keywords ***
-Abre site
+Abre pagina
     Open Available Browser    https://front.serverest.dev/login    maximized=true
 
 Loga Server
@@ -102,5 +102,5 @@ Vai para Lista de produtos
     Set Selenium Implicit Wait    7
 
 Novo metodo
-    ${html_table}=    Get Element Attribute    xpath://*[@id="root"]/div/div/p/table    outerHTML
+    ${html_table}=    Get Element Attribute    //*[@id="root"]/div/div/p/table    outerHTML
     Create File    ${CURDIR}/tabelaatualizada.csv    ${html_table}    encoding=utf-8    overwrite=True
