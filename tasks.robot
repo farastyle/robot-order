@@ -18,8 +18,6 @@ Library           html_tables.py
 Library           RPA.FileSystem
 
 *** Variables ***
-${username}=      gilberto5@gilberto.com
-${password}=      donpedro
 ${link}=          https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0ea65689-6a27-40ca-8799-f2811205c42c/Tabela_de_Produtos.xlsx?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220428%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220428T165938Z&X-Amz-Expires=86400&X-Amz-Signature=7df2d01b41dd8d958c34ce5c88485d2fa990c4a610b0295aece9c00580939393&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Tabela%2520de%2520Produtos.xlsx%22&x-id=GetObject
 ${names}
 ${breeds}
@@ -67,8 +65,8 @@ Loga Server
     ${onemore}    Is Element Visible    xpath=//*[@id="root"]/div/div/form/div[1]/button/span
     IF    ${onemore}
         Click Element    xpath://*[@id="root"]/div/div/form/small/a
-        Input Text    email    ${username}
-        Input Password    password    ${password}
+        Input Text    email    ${page}[username]
+        Input Password    password    ${page}[password]
         Click Element    //*[@id="root"]/div/div/form/button
         Exit For Loop If    ${onemore} == False
     END
