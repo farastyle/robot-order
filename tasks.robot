@@ -23,6 +23,7 @@ ${names}
 ${breeds}
 ${html_table}
 
+
 *** Tasks ***
 Loga no site
     Abre pagina
@@ -53,7 +54,7 @@ Abre pagina
     Open Available Browser    https://front.serverest.dev/login    maximized=true
 
 Loga Server
-    Click Element    xpath: //*[contains(text(), "Cadastre-se")]
+    Click Element    xpath://*[contains(text(), "Cadastre-se")]
     ${page}=    Get Secret    credentials
     Input Text    nome    ${page}[username]
     Input Text    email    ${page}[username]
@@ -109,7 +110,7 @@ Vai para Lista de produtos
     Set Selenium Implicit Wait    7
 
 Novo metodo
-    ${html_table}=    Get Element Attribute    //*[@id="root"]/div/div/p/table    outerHTML
+    ${html_table}=    Get Element Attribute    xpath://*[@id="root"]/div/div/p/table    outerHTML
     Create File    ${CURDIR}/tabelaatualizada.csv    ${html_table}    encoding=utf-8    overwrite=True
 
 Fecha tudo
